@@ -386,7 +386,6 @@ Each `ExteriorRing` and `InteriorRing` MUST consist of the following sequence:
 要素属性被编码为`tag`字段中的一对对整数。在每对`tag`中，第一个整数表示key在其所属的`layer`的`keys`列表的中索引号（以0开始）。第二个整数表示value在其所属的`layer`的`values`列表的中索引号（以0开始）。一个要素的所有key索引**必须唯一**，以保证要素中没有重复的属性项。每个要素的`tag`字段**必须**为偶数。要素中的`tag`字段包含的key索引号或value索引号**必须不**能大于或等于相应图层中`keys`或`values`列表中的元素数目。
 
 ### 4.5. 示例
-
 例如，一个GeoJSON格式的要素如下：
 
 ```json
@@ -479,3 +478,84 @@ layers {
 # 参考
 - [标准文档](https://github.com/jingsam/vector-tile-spec/blob/master/2.1/README_zh.md)
 - [Protocol Buffer Basics: Java](https://protobuf.dev/getting-started/javatutorial/)
+
+## 编码
+### 如何编码属性数据((https://docs.mapbox.com/data/tilesets/guides/vector-tiles-standards/#encoding-attributes))
+1. 提取properties的所有属性名和属性值
+2. 过滤属性名，保证每个属性名唯一，赋值keys并记录其索引index
+3. 过滤属性值，保证每个属性值唯一，赋值values并记录其索引index
+4. 根据属性名和属性值查找其index，编码为**tags:index**，建立映射关系
+### 优点
+#### 压缩数据、提高网络传输效率
+- 将元数据中大量冗余重复的属性名和属性值提取出来，用占用内存较小的整型数字代替，建立映射关系。能够减小pbf的体积，在网速相同的情况下，传输更快
+#### 举例
+```json
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "图斑",
+        "type": "面类型",
+        "fillColor": "#000000",
+        "area":1000
+      },
+      "geometry": {...}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "图斑",
+        "type": "面类型",
+        "fillColor": "#000000",
+        "area":500
+      },
+      "geometry": {...}
+    }
+  ]
+}
+```
+1. 提取... 
+2. 过滤后的`keys`：["name","type","fillColor","area"]
+3. 过滤后的`values`：["图斑","面类型","#000000",1000,500]
+4. 编码，建立映射关系
+```
+layers {
+    ...
+    features: {
+        id: 1
+        tags: 0
+        tags: 0
+        tags: 1
+        tags: 1
+        tags: 2
+        tags: 2
+        tags: 3
+        tags: 3
+        ...
+    }
+    features {
+        id: 2
+        tags: 0
+        tags: 0
+        tags: 1
+        tags: 1
+        tags: 2
+        tags: 2
+        tags: 3
+        tags: 4
+        ...
+    }
+    keys: "name"
+    keys: "type"
+    keys: "fillColor"
+    keys: "area"
+    values: { string_value: "图斑" }
+    values: { string_value: "面类型" }
+    values: { string_value: "#000000" }
+    values: { int_value: 1000 }
+    values: { int_value: 500 }
+    ...
+}
+```
