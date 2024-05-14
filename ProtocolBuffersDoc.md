@@ -9,25 +9,94 @@
 - 序列化和反序列化的性能比JSON和XML更快
 ## PBF的缺点
 ### 什么情况下不适用PBF(https://protobuf.dev/overview/#not-good-fit)
-## PBF是如何工作的(https://protobuf.dev/overview/#work)
-### 1. 先定义.proto数据结构
+## HelloWorld(Java版)(https://protobuf.dev/overview/#work)
+### 1. 安装编译器
+1. [下载](https://protobuf.dev/downloads/)
+2. 解压缩
+3. 配置环境变量-Path-`...\bin`
+4. 验证-cmd-`protoc --version`
+### 2. 定义.proto数据结构
+- `PersonMsg.proto`
 ```protobuf
+syntax = "proto2";
+package com.pbftest.test;
+
+option java_outer_classname = "PersonBean";
+
 message Person {
-  optional string name = 1;
-  optional int32 id = 2;
-  optional string email = 3;
+  required string name = 1;
+  required int32 age = 2;
+  optional string gender = 3;
 }
 ```
-### 2. 编译.proto
-- 编译`.proto`将创建一个类，可以使用该类来创建新实例
+### 3. 编译.proto
+- 编译命令`protoc.exe --java_out=./ PersonMsg.proto`
+- 编译`.proto`后，会创建一个java类，可以使用该类来创建新实例
+### 4. 创建新的示例并序列化
+```java
+import com.pbftest.test.PersonBean;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
+public class SimulatedClientServer {
+
+    // 模拟服务器
+    public static void Server(ByteArrayInputStream input){
+        // 从输入流中解析出 Person 对象
+        try {
+            PersonBean.Person person = PersonBean.Person.parseFrom(input);
+            if (person != null) {
+                System.out.println("服务端收到的数据:\n" + person.toString());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // 模拟客户端
+    public static byte[] Client() {
+        // 构造一个 Person 对象
+        PersonBean.Person person = PersonBean.Person.newBuilder()
+                .setName("zhangsan")
+                .setAge(18)
+                .setGender("male")
+                .build();
+
+
+        long pbfStartTime = System.currentTimeMillis();
+
+        // 将 Person 对象序列化为字节数组
+        byte[] serializedPerson = person.toByteArray();
+
+        long pbfEndTime = System.currentTimeMillis();
+        long pbfSerializationTime = pbfEndTime - pbfStartTime;
+        System.out.println("序列化所耗时间" + pbfSerializationTime + " ms");
+        return serializedPerson;
+    }
+
+    public static void main(String[] args){
+        // 模拟客户端发送数据
+        byte[] serializedPerson = Client();
+
+        // 使用字节数组输入流模拟网络传输
+        ByteArrayInputStream bais = new ByteArrayInputStream(serializedPerson);
+
+        // 模拟服务器接收数据
+        Server(bais);
+
+        // 因为使用了字节数组输入流，所以不需要关闭它
+        // 如果是真实的网络流，则在处理完毕后需要关闭
+    }
+}
 ```
-Person john = Person.newBuilder()
-    .setId(1234)
-    .setName("John Doe")
-    .setEmail("jdoe@example.com")
-    .build();
-output = new FileOutputStream(args[0]);
-john.writeTo(output);
+- 运行结果:
+```
+序列化所耗时间12 ms
+服务端收到的数据:
+name: "zhangsan"
+age: 18
+gender: "male"
 ```
 ## PBF的数据结构(https://protobuf.dev/overview/#syntax)
 ### 关键字
