@@ -112,9 +112,9 @@ public class VectorTileEncoder {
      * is a good default.
      *
      * @param extent
-     *            a int with extent value. 4096 is a good value.
+     *            a int with extent value. 4096 is a good value.瓦片大小，单位：像素
      * @param clipBuffer
-     *            a int with clip buffer size for geometries. 8 is a good value.
+     *            a int with clip buffer size for geometries. 8 is a good value.瓦片的缓冲区大小，单位：像素
      * @param autoScale
      *            when true, the encoder expects coordinates in the 0..255 range and
      *            will scale them automatically to the 0..extent-1 range before
@@ -173,7 +173,7 @@ public class VectorTileEncoder {
      */
     public void addFeature(String layerName, Map<String, ?> attributes, Geometry geometry, long id) {
 
-        // skip small Polygon/LineString.
+        // 跳过细碎的图斑、很短的线
         if (geometry instanceof MultiPolygon && geometry.getArea() < minimumArea) {
             return;
         }
@@ -184,7 +184,7 @@ public class VectorTileEncoder {
             return;
         }
 
-        // special handling of GeometryCollection. subclasses are not handled here.
+        // GeometryCollection的特殊处理。这里不处理子类
         if (geometry.getClass().equals(GeometryCollection.class)) {
             for (int i = 0; i < geometry.getNumGeometries(); i++) {
                 Geometry subGeometry = geometry.getGeometryN(i);
@@ -194,10 +194,19 @@ public class VectorTileEncoder {
             return;
         }
         
-        // About to simplify and clip. Looks like simplification before clipping is
-        // faster than clipping before simplification
+
+        /**
+         * 以下是关于简化和裁剪的过程，且先简化再裁剪比先裁剪再简化效率要高
+         */
         
-        // simplify non-points
+        // 简化线、面
+        /**
+         * Geometry类型：
+         * "LineString"、"MultiLineString" DouglasPeuckerSimplifier简化
+         * "Polygon"、"MultiPolygon" 先根据 DouglasPeuckerSimplifier 简化，若简化后的结果 属于 "Polygon"、"MultiPolygon" ，则保存简化结果，否则使用 TopologyPreservingSimplifier 简化
+         * "Point" 不简化
+         * "MultiPoint"、"LinearRing"、"GeometryCollection"   使用 TopologyPreservingSimplifier 简化
+         */
         if (simplificationDistanceTolerance > 0.0 && !(geometry instanceof Point)) {
             if (geometry instanceof LineString || geometry instanceof MultiLineString) {
                 geometry = DouglasPeuckerSimplifier.simplify(geometry, simplificationDistanceTolerance);
@@ -214,7 +223,7 @@ public class VectorTileEncoder {
             }
         }
         
-        // clip geometry
+        // 用瓦片范围裁剪几何
         if (geometry instanceof Point) {
             if (!clipCovers(geometry)) {
                 return;
@@ -223,13 +232,14 @@ public class VectorTileEncoder {
             geometry = clipGeometry(geometry);
         }
 
-        // no need to add empty geometry
+        // 不添加空的geometry
         if (geometry == null || geometry.isEmpty()) {
             return;
         }
 
         // extra check for GeometryCollection after clipping as it can cause
         // GeometryCollection. Subclasses not handled here.
+        // 裁剪后额外检查 GeometryCollection
         if (geometry.getClass().equals(GeometryCollection.class)) {
             for (int i = 0; i < geometry.getNumGeometries(); i++) {
                 Geometry subGeometry = geometry.getGeometryN(i);
@@ -241,10 +251,11 @@ public class VectorTileEncoder {
 
         Layer layer = layers.get(layerName);
         if (layer == null) {
-            layer = new Layer();
+            layer = new Layer();    // 构造 Layer
             layers.put(layerName, layer);
         }
 
+        // 构造 Feature
         Feature feature = new Feature();
         feature.geometry = geometry;
         feature.id = id;
@@ -352,6 +363,7 @@ public class VectorTileEncoder {
     }
 
     /**
+     * 编码
      * @return a byte array with the vector tile
      */
     public byte[] encode() {
@@ -368,6 +380,7 @@ public class VectorTileEncoder {
             tileLayer.setName(layerName);
 
             tileLayer.addAllKeys(layer.keys());
+
 
             for (Object value : layer.values()) {
                 VectorTile.Tile.Value.Builder tileValue = VectorTile.Tile.Value.newBuilder();

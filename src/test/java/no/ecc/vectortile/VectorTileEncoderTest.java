@@ -52,6 +52,25 @@ public class VectorTileEncoderTest extends TestCase {
 
     private GeometryFactory gf = new GeometryFactory();
 
+    public void testEncodePoint() {
+        VectorTileEncoder vtm = new VectorTileEncoder(256);
+        Geometry geometry = gf.createPoint(new Coordinate(1,1));
+
+        Map<String, Object> attributes = new HashMap<String, Object>();
+        attributes.put("", "");
+//        attributes.put("key1", "value1");
+        vtm.addFeature("layer", attributes, geometry);
+
+        byte[] encoded = vtm.encode();
+        /**
+         * [26, 31, 10, 5, 108, 97, 121, 101, 114, 18, 11, 18, 2, 0, 0, 24, 1, 34, 3, 9, 2, 2, 26, 0, 34, 2, 10, 0, 40, -128, 2, 120, 2]
+         */
+        /**
+         * [26, 41, 10, 5, 108, 97, 121, 101, 114, 18, 11, 18, 2, 0, 0, 24, 1, 34, 3, 9, 2, 2, 26, 4, 107, 101, 121, 49, 34, 8, 10, 6, 118, 97, 108, 117, 101, 49, 40, -128, 2, 120, 2]
+         */
+        assertNotSame(0, encoded.length);
+    }
+
     public void testEncode() {
         VectorTileEncoder vtm = new VectorTileEncoder(256);
 

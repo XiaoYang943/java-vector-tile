@@ -480,7 +480,13 @@ layers {
 - [Protocol Buffer Basics: Java](https://protobuf.dev/getting-started/javatutorial/)
 
 ## 编码
-### 如何编码属性数据((https://docs.mapbox.com/data/tilesets/guides/vector-tiles-standards/#encoding-attributes))
+### [如何编码几何数据](https://docs.mapbox.com/data/tilesets/guides/vector-tiles-standards/#encoding-geometry)
+1. 地理坐标转瓦片坐标
+2. 不同的几何类型执行不同的`Command`
+   - `MoveTo`绘制点
+   - `LineTo`连线
+   - `ClosePath`闭合路径
+### [如何编码属性数据](https://docs.mapbox.com/data/tilesets/guides/vector-tiles-standards/#encoding-attributes)
 1. 提取properties的所有属性名和属性值
 2. 过滤属性名，保证每个属性名唯一，赋值keys并记录其索引index
 3. 过滤属性值，保证每个属性值唯一，赋值values并记录其索引index
@@ -559,3 +565,9 @@ layers {
     ...
 }
 ```
+## MVT的结构组成
+1. 瓦片的基本信息
+2. 若干个图层
+   1. 若干个要素
+      1. 几何数据
+      2. 属性数据
