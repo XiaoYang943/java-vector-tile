@@ -46,8 +46,8 @@ public class MvtBuilder {
 
     private final Bbox bbox;
 
-    public MvtBuilder(byte z, int x, int y, GeometryFactory geometryFactory) {
-        this(z, x, y, 4096, 8, geometryFactory);
+    public MvtBuilder(byte zoom, int tileX, int tileY, GeometryFactory geometryFactory) {
+        this(zoom, tileX, tileY, 4096, 8, geometryFactory);
     }
 
 
@@ -64,11 +64,11 @@ public class MvtBuilder {
      * @param extent     a int with extent value. 4096 is a good value.
      * @param clipBuffer a int with clip buffer size for geometries. 8 is a good value.
      */
-    public MvtBuilder(byte z, int x, int y, int extent, int clipBuffer, GeometryFactory geometryFactory) {
+    public MvtBuilder(byte zoom, int tileX, int tileY, int extent, int clipBuffer, GeometryFactory geometryFactory) {
         this.extent = extent;
-        bbox = createTileBbox(z, x, y, extent, clipBuffer);
+        bbox = createTileBbox(zoom, tileX, tileY, extent, clipBuffer);
         tileClip = new TileClip(bbox.xmin, bbox.ymin, bbox.xmax, bbox.ymax, geometryFactory);
-        mvtCoordinateConvertor = new MvtCoordinateConvertor(z, x, y);
+        mvtCoordinateConvertor = new MvtCoordinateConvertor(zoom, tileX, tileY);
     }
 
     /**
@@ -100,15 +100,25 @@ public class MvtBuilder {
     }
 
 
-    private static Bbox createTileBbox(byte z, int tileX, int tileY, int extent, int clipBuffer) {
+    /**
+     * 该方法貌似有点问题
+     *
+     * @param zoom
+     * @param tileX
+     * @param tileY
+     * @param extent
+     * @param clipBuffer
+     * @return
+     */
+    private static Bbox createTileBbox(byte zoom, int tileX, int tileY, int extent, int clipBuffer) {
         //瓦片左上角坐标
-        double x0 = Tile2Wgs84.tileX2lon(tileX, z);
-        double y0 = Tile2Wgs84.tileY2lat(tileY, z);
+        double x0 = Tile2Wgs84.tileX2lon(tileX, zoom);
+        double y0 = Tile2Wgs84.tileY2lat(tileY, zoom);
         //瓦片右下角坐标
-        double x1 = Tile2Wgs84.tileX2lon(tileX + 1, z);
-        double y1 = Tile2Wgs84.tileY2lat(tileY + 1, z);
+        double x1 = Tile2Wgs84.tileX2lon(tileX + 1, zoom);
+        double y1 = Tile2Wgs84.tileY2lat(tileY + 1, zoom);
         //clipBuffer后的坐标
-        double dx = (x1 - x0) / extent;
+        double dx = (x1 - x0) / extent; // 每像素多少经度
         double clipBufferX = dx * clipBuffer;
         x0 = x0 - clipBufferX;
         x1 = x1 + clipBufferX;

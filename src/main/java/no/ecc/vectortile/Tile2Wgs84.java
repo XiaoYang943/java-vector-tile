@@ -33,8 +33,8 @@ public class Tile2Wgs84 {
     private static final int[] pow2;//2的n次方
 
     static {
-        int n = 30;
-        pow2 = new int[n];
+        int n = 30; // zoom为0-29级
+        pow2 = new int[n];  // 存储2的n次方
         int s = 1;
         for (int i = 0; i < n; i++) {
             pow2[i] = s;
@@ -44,25 +44,23 @@ public class Tile2Wgs84 {
 
     /**
      * 瓦片转换纬度(左上角)
-     *
-     * @param y 瓦片y
-     * @param z 瓦片z
-     * @return 纬度
      */
-    public static double tileY2lat(int y, int z) {
-        double n = Math.PI - (2.0 * Math.PI * y) / pow2[z];
+    public static double tileY2lat(int tileY, int zoom) {
+        if (zoom < 0 || zoom >= pow2.length) {
+            throw new IllegalArgumentException("Zoom level out of range");
+        }
+        double n = Math.PI - (2.0 * Math.PI * tileY) / pow2[zoom];
         return Math.toDegrees(Math.atan(Math.sinh(n)));
     }
 
     /**
      * 瓦片转换经度(左上角)
-     *
-     * @param x 瓦片x
-     * @param z 瓦片z
-     * @return 经度
      */
-    public static double tileX2lon(int x, int z) {
-        return x * 360d / pow2[z] - 180;
+    public static double tileX2lon(int tileX, int zoom) {
+        if (zoom < 0 || zoom >= pow2.length) {
+            throw new IllegalArgumentException("Zoom level out of range");
+        }
+        return tileX * 360d / pow2[zoom] - 180;
     }
 
     /**
