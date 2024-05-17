@@ -75,6 +75,7 @@ public class VectorTileEncoder {
     
     private final GeometryFactory gf = new GeometryFactory();
 
+
     /**
      * Create a {@link VectorTileEncoder} with the default extent of 4096 and
      * clip buffer of 8.

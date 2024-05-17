@@ -11,6 +11,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+      <geotools.version>28.1</geotools.version>
   </properties>
   
   <dependencies>
@@ -32,6 +33,12 @@
           <artifactId>jackson-databind</artifactId>
           <version>2.13.0</version>
       </dependency>
+
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-web</artifactId>
+          <version>2.6.4</version>
+      </dependency>
     
     <dependency>
       <groupId>junit</groupId>
@@ -39,6 +46,325 @@
       <version>4.13.1</version>
       <scope>test</scope>
     </dependency>
+
+      <!-- 数据格式-Shp -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-shapefile</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 地图GUI -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-swing</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 数据格式-ArcGrid -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-arcgrid</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- Connection to an embedded EPSG database in HSQL format. This database is built from the SQL scripts delivered by EPSG. -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-epsg-hsql</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 坐标系 -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-epsg-extension</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 数据格式-GeoJSON -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-geojson</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 数据格式-GeoJSON(基于Jackson) -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-geojson-core</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 通用查询语言 -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-cql</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 栅格图像处理 -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-coverage</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 数据格式-GeoTiff -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-geotiff</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-geojson-core</artifactId>
+          <version>${geotools.version}</version>
+          <exclusions>
+              <exclusion>
+                  <artifactId>jackson-core</artifactId>
+                  <groupId>com.fasterxml.jackson.core</groupId>
+              </exclusion>
+          </exclusions>
+      </dependency>
+      <!-- 自定义函数 -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-process</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- HTTP客户端 -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-http</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 数据格式-GeoPackage -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-geopkg</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 要素可视化渲染器 -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-render</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 主模块 -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-main</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!--DataAccess to create complex feature types defined in a GML application schema.-->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-app-schema</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- geotiff -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-geotiff</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 图graph -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-graph</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- PostGIS-JDBC -->
+      <dependency>
+          <groupId>org.geotools.jdbc</groupId>
+          <artifactId>gt-jdbc-postgis</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- Oracle-JDBC -->
+      <dependency>
+          <groupId>org.geotools.jdbc</groupId>
+          <artifactId>gt-jdbc-oracle</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- SqlServer-JDBC -->
+      <dependency>
+          <groupId>org.geotools.jdbc</groupId>
+          <artifactId>gt-jdbc-sqlserver</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- H2-JDBC -->
+      <dependency>
+          <groupId>org.geotools.jdbc</groupId>
+          <artifactId>gt-jdbc-h2</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- JDBC -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-jdbc</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- OGC服务-WMS -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-jdbc</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- OGC服务-WFS -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-wfs-ng</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- OGC服务-WFS -->
+      <!--        <dependency>-->
+      <!--            <groupId>org.geotools-ogc</groupId>-->
+      <!--            <artifactId>net.opengis.wfs</artifactId>-->
+      <!--            <version>${geotools.version}</version>-->
+      <!--        </dependency>-->
+      <!-- 数据格式-Image -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-image</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 数据格式-Image、geotiff、jp2k -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-imagemosaic</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 数据格式-Image扩展插件(GDAL接口) -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-imageio-ext-gdal</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 数据格式-栅格 -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-process-raster</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- Feature、FeatureCollection -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-process-feature</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- FeatureSource、FeatureStore -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-transform</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 格网 -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-grid</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 未知 -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-brewer</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 数据格式-KML -->
+      <dependency>
+          <groupId>org.geotools.xsd</groupId>
+          <artifactId>gt-xsd-kml</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 数据格式-XML过滤器 -->
+      <dependency>
+          <groupId>org.geotools.xsd</groupId>
+          <artifactId>gt-xsd-wfs</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 数据格式-XML过滤器 -->
+      <dependency>
+          <groupId>org.geotools.xsd</groupId>
+          <artifactId>gt-xsd-ows</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 数据格式-XML -->
+      <dependency>
+          <groupId>org.geotools.xsd</groupId>
+          <artifactId>gt-xsd-core</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 数据格式-XML -->
+      <dependency>
+          <groupId>org.geotools.xsd</groupId>
+          <artifactId>gt-xsd-filter</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 数据格式-GML3 XML -->
+      <dependency>
+          <groupId>org.geotools.xsd</groupId>
+          <artifactId>gt-xsd-gml3</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 数据格式-SLD -->
+      <dependency>
+          <groupId>org.geotools.xsd</groupId>
+          <artifactId>gt-xsd-sld</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 数据格式-GML2 XM -->
+      <dependency>
+          <groupId>org.geotools.xsd</groupId>
+          <artifactId>gt-xsd-gml2</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 数据格式-XML过滤器 -->
+      <dependency>
+          <groupId>org.geotools.xsd</groupId>
+          <artifactId>gt-xsd-fes</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 元数据、核心工具类 -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-metadata</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 数据格式-GML -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-app-schema</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 未知 -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-property</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 坐标系 -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-referencing</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 样例数据 -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-sample-data</artifactId>
+          <version>${geotools.version}</version>
+          <scope>test</scope>
+      </dependency>
+      <!-- 数据格式-KML -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-xml</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+      <!-- 坐标系 -->
+      <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-epsg-wkt</artifactId>
+          <version>${geotools.version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-math</artifactId>
+          <version>2.2</version>
+      </dependency>
   </dependencies>
 
  <build>
@@ -94,4 +420,29 @@
   </plugin>
  </plugins>
 </build>
+
+    <repositories>
+        <repository>
+            <id>osgeo</id>
+            <name>OSGeo Release Repository</name>
+            <url>https://repo.osgeo.org/repository/release/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+        <repository>
+            <id>osgeo-snapshot</id>
+            <name>OSGeo Snapshot Repository</name>
+            <url>https://repo.osgeo.org/repository/snapshot/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
 </project>
