@@ -20,11 +20,9 @@
 package no.ecc.vectortile;
 
 
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryCollection;
-import org.locationtech.jts.geom.TopologyException;
+import org.locationtech.jts.geom.*;
+import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
-
 
 import java.util.*;
 
@@ -36,59 +34,61 @@ import java.util.*;
  */
 public final class MvtLayer {
 
-    protected final List<MvtFeature> features = new LinkedList<>();
+    final List<MvtFeature> features = new LinkedList<>();
 
     private final Map<String, Integer> keys = new LinkedHashMap<>();
     private final Map<Object, Integer> values = new LinkedHashMap<>();
 
     private final MvtBuilder mvtBuilder;
 
-    private final double wgs84SimplifyDistance;
-
 
     /**
-     * @param mvtBuilder       mvtBuilder
-     * @param simplifyDistance 对geometry进行简化的长度,单位是瓦片像素，取值范围[0,extent+clipBuffer]，为0时表示不做简化
+     * @param mvtBuilder mvtBuilder
      */
-    protected MvtLayer( MvtBuilder mvtBuilder, int simplifyDistance) {
+    MvtLayer(MvtBuilder mvtBuilder) {
         this.mvtBuilder = mvtBuilder;
+    }
 
-        if (simplifyDistance > 0) {
-            Bbox bbox = mvtBuilder.getBbox();
-            double d = Math.sqrt(Math.pow(bbox.xmax - bbox.xmin, 2) + Math.pow(bbox.ymax - bbox.ymin, 2)) / mvtBuilder.extent;
-            wgs84SimplifyDistance = simplifyDistance * d;
-        } else {
-            wgs84SimplifyDistance = 0;
+
+    private Feature simplifyGeometry(Feature feature, Double simplificationDistanceTolerance, byte curZ, byte minZ) {
+        Geometry geometry = feature.getGeometry();
+        /**
+         * Geometry类型：
+         * "LineString"、"MultiLineString" DouglasPeuckerSimplifier简化
+         * "Polygon"、"MultiPolygon" 先根据 DouglasPeuckerSimplifier 简化，若简化后的结果 属于 "Polygon"、"MultiPolygon" ，则保存简化结果，否则使用 TopologyPreservingSimplifier 简化
+         * "Point" 不简化
+         * "MultiPoint"、"LinearRing"、"GeometryCollection"   使用 TopologyPreservingSimplifier 简化
+         */
+        if (simplificationDistanceTolerance > 0.0 && !(geometry instanceof Point)) {
+            if (curZ < minZ) {  // 当前瓦片的 zoom 小于最小 zoom 时才会简化
+                if (geometry instanceof LineString || geometry instanceof MultiLineString) {
+                    geometry = DouglasPeuckerSimplifier.simplify(geometry, simplificationDistanceTolerance);
+                } else if (geometry instanceof Polygon || geometry instanceof MultiPolygon) {
+                    Geometry simplified = DouglasPeuckerSimplifier.simplify(geometry, simplificationDistanceTolerance);
+                    // extra check to prevent polygon converted to line
+                    if (simplified instanceof Polygon || simplified instanceof MultiPolygon) {
+                        geometry = simplified;
+                    } else {
+                        geometry = TopologyPreservingSimplifier.simplify(geometry, simplificationDistanceTolerance);
+                    }
+                } else {
+                    geometry = TopologyPreservingSimplifier.simplify(geometry, simplificationDistanceTolerance);
+                }
+                feature.setGeometry(geometry);
+            }
         }
+        return feature;
     }
 
-    public void addFeatures( Iterable<Feature> features) {
-        for (Feature feature : features) {
-            addFeature(feature);
-        }
+    public void addFeature(Feature feature, Double simplificationDistanceTolerance, byte curZ, byte minZ) {
+        // 先简化再裁剪比先裁剪再简化效率要高
+        feature = simplifyGeometry(feature, simplificationDistanceTolerance, curZ, minZ);
+        addCipedGeometryAndAttributes(feature.getProperties(), clipGeometry(feature.getGeometry()));
     }
 
-    public void addClipedFeatures( Iterable<Feature> features) {
-        for (Feature feature : features) {
-            addClipedFeature(feature);
-        }
-    }
-
-    public void addFeature( Feature feature) {
-        Geometry clipedGeometry = clipGeometry(feature.getGeometry());
-        addCipedGeometryAndAttributes(feature.getProperties(), clipedGeometry);
-    }
-
-    public void addClipedFeature( Feature feature) {
-        addCipedGeometryAndAttributes(feature.getProperties(), feature.getGeometry());
-    }
-
-    public void addCipedGeometryAndAttributes(Map<String, ?> attributes,  Geometry clipedGeometry) {
+    public void addCipedGeometryAndAttributes(Map<String, ?> attributes, Geometry clipedGeometry) {
         if (null == clipedGeometry || clipedGeometry.isEmpty()) {
             return;//裁剪完没有交集则直接return
-        }
-        if (wgs84SimplifyDistance > 0) {
-            clipedGeometry = TopologyPreservingSimplifier.simplify(clipedGeometry, wgs84SimplifyDistance);
         }
         // 转换并添加feature
         ArrayList<Integer> tags = tags(attributes);
@@ -100,7 +100,7 @@ public final class MvtLayer {
     }
 
     //拆出GeometryCollection中的geometry塞到list中
-    private void resolveGeometryCollection( Geometry geometry,  List<Geometry> resolveGeometries) {
+    private void resolveGeometryCollection(Geometry geometry, List<Geometry> resolveGeometries) {
         for (int i = 0; i < geometry.getNumGeometries(); i++) {
             Geometry subGeometry = geometry.getGeometryN(i);
             if (subGeometry.getClass().equals(GeometryCollection.class)) {
@@ -123,7 +123,7 @@ public final class MvtLayer {
     }
 
     //将attributes转为tags以便加入到feature
-    private ArrayList<Integer> tags( Map<String, ?> attributes) {
+    private ArrayList<Integer> tags(Map<String, ?> attributes) {
         if (null == attributes) {
             return null;
         }
@@ -139,19 +139,19 @@ public final class MvtLayer {
         return tags;
     }
 
-    private  Integer key(String key) {
+    private Integer key(String key) {
         return keys.computeIfAbsent(key, k -> keys.size());
     }
 
-    protected  Set<String> keys() {
+    Set<String> keys() {
         return keys.keySet();
     }
 
-    private  Integer value(Object value) {
+    private Integer value(Object value) {
         return values.computeIfAbsent(value, k -> values.size());
     }
 
-    protected Set<Object> values() {
+    Set<Object> values() {
         return values.keySet();
     }
 

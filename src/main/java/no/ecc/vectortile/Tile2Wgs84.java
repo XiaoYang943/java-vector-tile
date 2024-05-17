@@ -30,7 +30,7 @@ import org.apache.commons.math.util.FastMath;
  */
 public class Tile2Wgs84 {
 
-    private static final int [] pow2;//2的n次方
+    private static final int[] pow2;//2的n次方
 
     static {
         int n = 30;
@@ -49,7 +49,7 @@ public class Tile2Wgs84 {
      * @param z 瓦片z
      * @return 纬度
      */
-    public static double tileY2lat(int y, byte z) {
+    public static double tileY2lat(int y, int z) {
         double n = Math.PI - (2.0 * Math.PI * y) / pow2[z];
         return Math.toDegrees(Math.atan(Math.sinh(n)));
     }
@@ -61,7 +61,7 @@ public class Tile2Wgs84 {
      * @param z 瓦片z
      * @return 经度
      */
-    public static double tileX2lon(int x, byte z) {
+    public static double tileX2lon(int x, int z) {
         return x * 360d / pow2[z] - 180;
     }
 
