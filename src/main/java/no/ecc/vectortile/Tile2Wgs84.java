@@ -30,7 +30,7 @@ import org.apache.commons.math.util.FastMath;
  */
 public class Tile2Wgs84 {
 
-    private static final int[] pow2;//2的n次方
+    private static final int[] pow2;//pow2[i]:2的i次方
 
     static {
         int n = 30; // zoom为0-29级
@@ -54,6 +54,17 @@ public class Tile2Wgs84 {
     }
 
     /**
+     * 瓦片转换纬度(左上角)
+     */
+    public static double tileY2lat1(int tileY, int zoom,int pixelY) {
+        if (zoom < 0 || zoom >= pow2.length) {
+            throw new IllegalArgumentException("Zoom level out of range");
+        }
+        double n = Math.PI - (2.0 * Math.PI * (tileY + (double) pixelY / 256)) / pow2[zoom];
+        return Math.toDegrees(Math.atan(Math.sinh(n)));
+    }
+
+    /**
      * 瓦片转换经度(左上角)
      */
     public static double tileX2lon(int tileX, int zoom) {
@@ -61,6 +72,13 @@ public class Tile2Wgs84 {
             throw new IllegalArgumentException("Zoom level out of range");
         }
         return tileX * 360d / pow2[zoom] - 180;
+    }
+
+    public static double tileX2lon1(int tileX, int zoom,int pixelX) {
+        if (zoom < 0 || zoom >= pow2.length) {
+            throw new IllegalArgumentException("Zoom level out of range");
+        }
+        return (tileX + (double) pixelX / 256) * 360d / pow2[zoom] - 180;
     }
 
     /**

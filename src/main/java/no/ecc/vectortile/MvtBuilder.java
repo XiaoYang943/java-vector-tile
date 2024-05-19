@@ -102,7 +102,7 @@ public class MvtBuilder {
 
     /**
      * 该方法貌似有点问题
-     *
+     * 瓦片都是正方形，确定瓦片的位置只需要两个对角坐标，即左上角和右下角
      * @param zoom
      * @param tileX
      * @param tileY
@@ -112,11 +112,18 @@ public class MvtBuilder {
      */
     private static Bbox createTileBbox(byte zoom, int tileX, int tileY, int extent, int clipBuffer) {
         //瓦片左上角坐标
-        double x0 = Tile2Wgs84.tileX2lon(tileX, zoom);
-        double y0 = Tile2Wgs84.tileY2lat(tileY, zoom);
+//        double x0 = Tile2Wgs84.tileX2lon(tileX, zoom);
+//        double y0 = Tile2Wgs84.tileY2lat(tileY, zoom);
+//        //瓦片右下角坐标
+//        double x1 = Tile2Wgs84.tileX2lon(tileX + 1, zoom);
+//        double y1 = Tile2Wgs84.tileY2lat(tileY + 1, zoom);
+
+        //瓦片左上角坐标
+        double x0 = Tile2Wgs84.tileX2lon1(tileX, zoom,0);
+        double y0 = Tile2Wgs84.tileY2lat1(tileY, zoom,0);
         //瓦片右下角坐标
-        double x1 = Tile2Wgs84.tileX2lon(tileX + 1, zoom);
-        double y1 = Tile2Wgs84.tileY2lat(tileY + 1, zoom);
+        double x1 = Tile2Wgs84.tileX2lon1(tileX, zoom,extent);
+        double y1 = Tile2Wgs84.tileY2lat1(tileY, zoom,extent);
         //clipBuffer后的坐标
         double dx = (x1 - x0) / extent; // 每像素多少经度
         double clipBufferX = dx * clipBuffer;
@@ -127,7 +134,6 @@ public class MvtBuilder {
         double clipBufferY = dy * clipBuffer;
         y0 = y0 + clipBufferY;
         y1 = y1 - clipBufferY;
-
         return new Bbox(x0, y1, x1, y0);
     }
 
